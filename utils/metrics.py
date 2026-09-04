@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Any
+from pathlib import Path
+from typing import Sequence
 
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from sklearn.metrics import f1_score
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix, f1_score
 
 
 def topk_accuracy(logits: torch.Tensor, targets: torch.Tensor, k: int) -> int:
@@ -14,6 +16,34 @@ def topk_accuracy(logits: torch.Tensor, targets: torch.Tensor, k: int) -> int:
     k = min(k, logits.size(1))
     topk_predictions = logits.topk(k, dim=1).indices
     return int(topk_predictions.eq(targets.unsqueeze(1)).any(dim=1).sum().item())
+
+
+def plot_normalized_confusion_matrix(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    class_names: Sequence[str],
+    output_path: str | Path,
+) -> np.ndarray:
+    """Save a row-normalized confusion matrix and return its raw counts."""
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    raw_counts = confusion_matrix(y_true, y_pred)
+    row_totals = raw_counts.sum(axis=1, keepdims=True)
+    normalized_matrix = np.divide(
+        raw_counts,
+        row_totals,
+        out=np.zeros_like(raw_counts, dtype=float),
+        where=row_totals != 0,
+    )
+
+    figure, axis = plt.subplots(figsize=(18, 16))
+    display = ConfusionMatrixDisplay(normalized_matrix, display_labels=class_names)
+    display.plot(ax=axis, cmap="Blues", colorbar=True, xticks_rotation=90, values_format=".0%")
+    axis.set_title("37-class normalized confusion matrix")
+    figure.tight_layout()
+    figure.savefig(output_path, dpi=200)
+    plt.close(figure)
+    return raw_counts
 
 
 @torch.no_grad()
