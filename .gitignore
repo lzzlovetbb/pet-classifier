@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.DS_Store
+
+data/oxford-iiit-pet/
+outputs/
+runs/
+checkpoints/
+artifacts/
+figures/
+*.pth
+*.pt
+*.npz
