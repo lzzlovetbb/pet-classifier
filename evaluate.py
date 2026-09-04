@@ -6,15 +6,13 @@ import argparse
 import json
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
-from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 
 from data.dataset import build_pet_dataloaders, set_seed
 from models.model import build_resnet18
-from utils.metrics import evaluate_model
+from utils.metrics import evaluate_model, plot_normalized_confusion_matrix
 
 
 def parse_args() -> argparse.Namespace:
@@ -63,21 +61,12 @@ def main() -> None:
     )
 
     if args.save_confusion_matrix:
-        raw_counts = confusion_matrix(y_true, y_pred)
-        row_totals = raw_counts.sum(axis=1, keepdims=True)
-        normalized_matrix = np.divide(
-            raw_counts,
-            row_totals,
-            out=np.zeros_like(raw_counts, dtype=float),
-            where=row_totals != 0,
+        raw_counts = plot_normalized_confusion_matrix(
+            y_true,
+            y_pred,
+            class_names,
+            figure_dir / "confusion_matrix.png",
         )
-        figure, axis = plt.subplots(figsize=(18, 16))
-        display = ConfusionMatrixDisplay(normalized_matrix, display_labels=class_names)
-        display.plot(ax=axis, cmap="Blues", colorbar=True, xticks_rotation=90, values_format=".0%")
-        axis.set_title("37-class normalized confusion matrix")
-        figure.tight_layout()
-        figure.savefig(figure_dir / "confusion_matrix.png", dpi=200)
-        plt.close(figure)
         np.savetxt(artifact_dir / "confusion_matrix_counts.csv", raw_counts, delimiter=",", fmt="%d")
 
 

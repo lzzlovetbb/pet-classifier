@@ -22,7 +22,7 @@
     ├── models/
     │   └── model.py         # 预训练 ResNet-18
     ├── utils/
-    │   ├── metrics.py       # Top-1、Top-5、Macro-F1
+    │   ├── metrics.py       # Top-1、Top-5、Macro-F1 与混淆矩阵
     │   └── gradcam.py       # Grad-CAM 可解释性工具
     ├── train.py             # 训练入口
     ├── evaluate.py          # 测试和混淆矩阵入口
@@ -43,11 +43,11 @@ runs 文件夹中）。如需要放在仓库中，可将该文件夹复制为 lo
 
 训练基线模型：
 
-    python train.py --experiment-name baseline --label-smoothing 0.0
+    python train.py --experiment-name baseline --label_smoothing 0.0
 
 只改变损失函数的 label smoothing 系数，运行单变量消融：
 
-    python train.py --experiment-name label_smoothing --label-smoothing 0.1
+    python train.py --experiment-name label_smoothing --label_smoothing 0.1
 
 使用已保存的最佳模型在测试集评估并保存混淆矩阵：
 
@@ -79,7 +79,7 @@ runs 文件夹中）。如需要放在仓库中，可将该文件夹复制为 lo
 
 本项目在学习和开发过程中使用 AI 助手辅助解释深度学习术语、梳理代码结构、生成初版模板与排查报错。实验由作者本人在 Kaggle GPU 环境中执行，所有指标、图表与结果均来自实际运行输出，并经作者核对。
 
-一次具体调试记录：Kaggle Notebook 在使用 DataLoader 的 num_workers=2 时出现 AssertionError: can only test a child process。该问题来自 Notebook 会话重启后遗留的数据加载子进程。将 num_workers 改为 0 后，数据加载恢复稳定，并确认图片 batch 形状仍为 [32, 3, 224, 224]、标签 batch 形状仍为 [32]。这不是模型或数据划分的修改。
+一次具体调试记录：Codex 给出的初版 DataLoader 使用 num_workers=2；在 Kaggle Notebook 会话重启后，它出现了 AssertionError: can only test a child process。将 num_workers 改为 0 后，数据加载恢复稳定，并确认图片 batch 形状仍为 [32, 3, 224, 224]、标签 batch 形状仍为 [32]。这不是模型或数据划分的修改。
 
 ## 7. 提交时的文件边界
 

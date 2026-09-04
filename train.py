@@ -58,7 +58,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--learning-rate", type=float, default=1e-4)
     parser.add_argument("--weight-decay", type=float, default=1e-4)
-    parser.add_argument("--label-smoothing", type=float, default=0.0)
+    parser.add_argument(
+        "--label-smoothing",
+        "--label_smoothing",
+        dest="label_smoothing",
+        type=float,
+        default=0.0,
+        help="Label smoothing coefficient. Both hyphen and underscore forms are supported.",
+    )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--no-download", action="store_true")
@@ -93,7 +100,12 @@ def main() -> None:
     best_validation_top1 = -1.0
     best_epoch = 0
     history: list[dict[str, float | int]] = []
-    checkpoint_path = checkpoint_dir / f"{args.experiment_name}_best_model.pth"
+    checkpoint_name = (
+        "best_model.pth"
+        if args.experiment_name == "baseline"
+        else f"{args.experiment_name}_best_model.pth"
+    )
+    checkpoint_path = checkpoint_dir / checkpoint_name
 
     for epoch in range(1, args.epochs + 1):
         train_loss, train_top1 = train_one_epoch(model, train_loader, criterion, optimizer, device)
@@ -170,4 +182,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
